@@ -1,0 +1,42 @@
+version: "3.7"
+services:
+  laravel-nginx:
+    build:
+      context: ./docker/development
+      dockerfile: nginx.docker
+    volumes:
+      - ./:/app
+    depends_on:
+      - laravel-php-fpm
+    ports:
+      - "8080:80"
+  laravel-php-fpm:
+    build:
+      context: ./docker/development
+      dockerfile: php-fpm.docker
+    volumes:
+      - ./:/app
+    depends_on:
+        - laravel-postgres
+  laravel-php-cli:
+    build:
+      context: ./docker/development
+      dockerfile: php-cli.docker
+    volumes:
+      - ./:/app
+      - composer:/root/.composer/cache
+    depends_on:
+        - laravel-postgres
+  laravel-postgres:
+      image: postgres:13.3-alpine
+      volumes:
+          - laravel-postgres:/var/lib/postgresql/data
+      environment:
+          - POSTGRES_USER=app
+          - POSTGRES_PASSWORD=secret
+          - POSTGRES_DB=app
+      ports:
+          - '5432:5432'
+volumes:
+    laravel-postgres:
+    composer:
